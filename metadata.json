@@ -1,0 +1,6 @@
+{
+  "name": "GlassBoard",
+  "description": "A production-grade glassmorphism custom keyboard highlighting fluidity, custom theme editors, and clipboard management under Material 3 layout rules.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
