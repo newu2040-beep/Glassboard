@@ -10,6 +10,37 @@ class KeyboardPreferences(private val context: Context) {
 
     private val prefs: SharedPreferences = context.getSharedPreferences("glassboard_prefs", Context.MODE_PRIVATE)
 
+    private val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        when (key) {
+            "key_height_dp" -> _keyHeight.value = prefs.getInt(key, 54)
+            "corner_radius_dp" -> _cornerRadius.value = prefs.getInt(key, 12)
+            "blur_intensity" -> _blurIntensity.value = prefs.getFloat(key, 15f)
+            "glass_opacity" -> _glassOpacity.value = prefs.getFloat(key, 0.35f)
+            "reflection_intensity" -> _reflectionIntensity.value = prefs.getFloat(key, 0.5f)
+            "shadow_depth" -> _shadowDepth.value = prefs.getFloat(key, 4f)
+            "active_theme_id" -> _activeThemeId.value = prefs.getString(key, "crystal_blue") ?: "crystal_blue"
+            "keyboard_scale" -> _keyboardSize.value = prefs.getFloat(key, 1.0f)
+            "keyboard_pos" -> _keyboardPosition.value = prefs.getString(key, "center") ?: "center"
+            "keyboard_layout" -> _keyboardLayout.value = prefs.getString(key, "QWERTY") ?: "QWERTY"
+            "font_family" -> _fontFamily.value = prefs.getString(key, "System") ?: "System"
+            "haptic_feedback" -> _isHapticEnabled.value = prefs.getBoolean(key, true)
+            "haptic_strength" -> _hapticStrength.value = prefs.getInt(key, 50)
+            "sound_feedback" -> _isSoundEnabled.value = prefs.getBoolean(key, false)
+            "swipe_typing" -> _isSwipeTypingEnabled.value = prefs.getBoolean(key, false)
+            "auto_cap" -> _isAutoCapEnabled.value = prefs.getBoolean(key, true)
+            "auto_spacing" -> _isAutoSpacingEnabled.value = prefs.getBoolean(key, true)
+            "auto_correct" -> _isAutoCorrectEnabled.value = prefs.getBoolean(key, true)
+            "cursor_control" -> _isCursorControlEnabled.value = prefs.getBoolean(key, true)
+            "high_contrast" -> _isHighContrastMode.value = prefs.getBoolean(key, false)
+            "custom_keys_json" -> _customKeysJson.value = prefs.getString(key, "") ?: ""
+            "background_uri" -> _backgroundUri.value = prefs.getString(key, "") ?: ""
+        }
+    }
+
+    init {
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+    }
+
     private val _keyHeight = MutableStateFlow(prefs.getInt("key_height_dp", 54))
     val keyHeight: StateFlow<Int> = _keyHeight.asStateFlow()
 

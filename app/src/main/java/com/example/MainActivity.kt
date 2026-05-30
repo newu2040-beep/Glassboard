@@ -104,6 +104,31 @@ fun GlassBoardSettingsApp(
         }
     }
 
+    // Real-time Keyboard Integration Checker
+    var isKeyboardEnabled by remember { mutableStateOf(false) }
+    var isKeyboardSelected by remember { mutableStateOf(false) }
+    
+    LaunchedEffect(Unit) {
+        while (true) {
+            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? android.view.inputmethod.InputMethodManager
+            val enabledList = imm?.enabledInputMethodList ?: emptyList()
+            isKeyboardEnabled = enabledList.any { it.packageName == context.packageName }
+            
+            val currentIme = android.provider.Settings.Secure.getString(
+                context.contentResolver,
+                android.provider.Settings.Secure.DEFAULT_INPUT_METHOD
+            )
+            isKeyboardSelected = currentIme != null && currentIme.contains(context.packageName)
+            
+            kotlinx.coroutines.delay(1200)
+        }
+    }
+
+    // Custom Design Color Tint Selectors
+    var selectedGlassColor by remember { mutableStateOf("#FFFFFF") }
+    var selectedAccentColor by remember { mutableStateOf("#00BCD4") }
+    var selectedBgColor by remember { mutableStateOf("#0F172A") }
+
     // Determine current theme
     var activeTheme by remember { mutableStateOf(ThemeEngine.presetThemes[2]) }
     LaunchedEffect(activeThemeId) {
@@ -112,7 +137,13 @@ fun GlassBoardSettingsApp(
         } catch (e: Exception) {
             null
         }
-        activeTheme = ThemeEngine.getThemeWithCustom(activeThemeId, custom)
+        val loaded = ThemeEngine.getThemeWithCustom(activeThemeId, custom)
+        activeTheme = loaded
+        
+        // Populate designer with current selected theme's base colors
+        selectedGlassColor = ThemeEngine.colorToHexStr(loaded.glassColor)
+        selectedAccentColor = ThemeEngine.colorToHexStr(loaded.accentColor)
+        selectedBgColor = ThemeEngine.colorToHexStr(loaded.backgroundStart)
     }
 
     // Interactive text area inside the live preview
@@ -185,6 +216,143 @@ fun GlassBoardSettingsApp(
             }
         }
 
+        // Construct Dynamic live preview theme
+        val previewTheme = remember(
+            activeThemeId, activeTheme,
+            selectedGlassColor, selectedAccentColor, selectedBgColor,
+            isHighContrast, glassOpacity, reflectionIntensity, shadowDepth
+        ) {
+            if (isHighContrast) {
+                GlassTheme(
+                    id = "high_contrast",
+                    displayName = "High Contrast Glass",
+                    isDark = true,
+                    backgroundStart = Color(0xFF000000),
+                    backgroundEnd = Color(0xFF000000),
+                    glassColor = Color(0xFF000000),
+                    glassBorderColor = Color.White,
+                    keyColor = Color(0xFF1E293B),
+                    keyActiveColor = Color.Yellow,
+                    textColor = Color.White,
+                    accentColor = Color.Yellow,
+                    glassOpacity = 0.95f,
+                    reflectionIntensity = 1.0f,
+                    shadowDepth = 6f
+                )
+            } else {
+                val parsedBg = try { Color(android.graphics.Color.parseColor(selectedBgColor)) } catch (e: Exception) { Color(0xFF0F172A) }
+                val parsedGlass = try { Color(android.graphics.Color.parseColor(selectedGlassColor)) } catch (e: Exception) { Color(0xFFFFFFFF) }
+                val parsedAccent = try { Color(android.graphics.Color.parseColor(selectedAccentColor)) } catch (e: Exception) { Color(0xFF00BCD4) }
+                val isLightGlass = selectedGlassColor.equals("#FFFFFF", ignoreCase = true)
+                
+                GlassTheme(
+                    id = "live_preview",
+                    displayName = "Custom Preview Design",
+                    isDark = activeTheme.isDark,
+                    backgroundStart = parsedBg,
+                    backgroundEnd = parsedBg,
+                    glassColor = parsedGlass,
+                    glassBorderColor = if (isLightGlass) Color.Black.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.35f),
+                    keyColor = parsedGlass.copy(alpha = 0.5f),
+                    keyActiveColor = parsedAccent,
+                    textColor = if (isLightGlass) Color(0xFF000000) else Color.White,
+                    accentColor = parsedAccent,
+                    glassOpacity = glassOpacity,
+                    reflectionIntensity = reflectionIntensity,
+                    shadowDepth = shadowDepth
+                )
+            }
+        }
+
+        // Easy-Access Connection Assistant Desk (Direct activation and status display)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color.White.copy(alpha = 0.04f))
+                .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(20.dp))
+                .padding(14.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (isKeyboardSelected) Color(0xFF10B981)
+                                else if (isKeyboardEnabled) Color(0xFFFBBF24)
+                                else Color(0xFFEF4444)
+                            )
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "System Integration: " + if (isKeyboardSelected) "ACTIVE & READY" else if (isKeyboardEnabled) "ENABLED BUT SELECTION REQUIRED" else "DISABLED IN SYSTEM",
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 0.5.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (!isKeyboardEnabled) {
+                Text(
+                    text = "👇 Step 1: Click below to enable GlassBoard in your device's System keyboard list, then return here.",
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontSize = 11.sp,
+                    lineHeight = 16.sp
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Button(
+                    onClick = {
+                        val intent = android.content.Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("👉 1. ACTIVATE IN DEVICE SETTINGS", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold)
+                }
+            } else if (!isKeyboardSelected) {
+                Text(
+                    text = "🎉 Awesome, Step 1 complete! Now choose GlassBoard as your active default in the keyboard picker.",
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontSize = 11.sp,
+                    lineHeight = 16.sp
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Button(
+                    onClick = {
+                        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? android.view.inputmethod.InputMethodManager
+                        imm?.showInputMethodPicker()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFBBF24)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("👑 2. SELECT GLASSBOARD AS DEFAULT", color = Color.Black, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold)
+                }
+            } else {
+                Text(
+                    text = "✨ Congratulations! Custom GlassBoard is fully active on your phone! Tap on any input field across any app to start writing with premium frosted glassmorphism aesthetics.",
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 11.sp,
+                    lineHeight = 16.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
         // Live Interactive Preview Card (Stunning visual design anchoring settings)
         Card(
             modifier = Modifier
@@ -237,7 +405,7 @@ fun GlassBoardSettingsApp(
 
                 // Anchor the Live Keyboard View!
                 KeyboardView(
-                    theme = activeTheme,
+                    theme = previewTheme,
                     layoutName = layoutName,
                     keyHeightDp = keyHeightDp,
                     cornerRadiusDp = cornerRadiusDp,
@@ -344,7 +512,13 @@ fun GlassBoardSettingsApp(
                     isSound,
                     isAutoCap,
                     isAutoSpace,
-                    isHighContrast
+                    isHighContrast,
+                    selectedGlassColor = selectedGlassColor,
+                    onGlassColorChange = { selectedGlassColor = it },
+                    selectedAccentColor = selectedAccentColor,
+                    onAccentColorChange = { selectedAccentColor = it },
+                    selectedBgColor = selectedBgColor,
+                    onBgColorChange = { selectedBgColor = it }
                 )
                 2 -> ClipboardTab(clipsList, database)
                 3 -> BackupTab(preferences)
@@ -447,7 +621,13 @@ fun DesignerTab(
     isSound: Boolean,
     isAutoCap: Boolean,
     isAutoSpace: Boolean,
-    isHighContrast: Boolean
+    isHighContrast: Boolean,
+    selectedGlassColor: String,
+    onGlassColorChange: (String) -> Unit,
+    selectedAccentColor: String,
+    onAccentColorChange: (String) -> Unit,
+    selectedBgColor: String,
+    onBgColorChange: (String) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -457,6 +637,140 @@ fun DesignerTab(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // Custom Glass Colors & Accents block
+        item {
+            Text(
+                "GLASS COLORS & GLOW ACCENTS",
+                color = Color.White.copy(alpha = 0.5f),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Color.White.copy(alpha = 0.03f))
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                // Glass Panel base color
+                Column {
+                    Text(
+                        text = "Glass Panel Base Color",
+                        color = Color.White,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        val options = listOf(
+                            "#FFFFFF" to Color.White,
+                            "#1E3A4D" to Color(0xFF1E3A4D),
+                            "#1A1A24" to Color(0xFF1A1A24),
+                            "#2D142C" to Color(0xFF2D142C),
+                            "#0F3D26" to Color(0xFF0F3D26),
+                            "#5B1020" to Color(0xFF5B1020)
+                        )
+                        items(options) { (hex, colorVal) ->
+                            val isSel = selectedGlassColor.equals(hex, ignoreCase = true)
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(colorVal)
+                                    .border(
+                                        width = if (isSel) 3.dp else 1.dp,
+                                        color = if (isSel) Color.White else Color.White.copy(alpha = 0.2f),
+                                        shape = CircleShape
+                                    )
+                                    .clickable { onGlassColorChange(hex) }
+                            )
+                        }
+                    }
+                }
+
+                // Accent Glow Color
+                Column {
+                    Text(
+                        text = "Glow Accent Color (Active Highlights)",
+                        color = Color.White,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        val options = listOf(
+                            "#00BCD4" to Color(0xFF00BCD4),
+                            "#00E5FF" to Color(0xFF00E5FF),
+                            "#8E2DE2" to Color(0xFF8E2DE2),
+                            "#FF007F" to Color(0xFFFF007F),
+                            "#39FF14" to Color(0xFF39FF14),
+                            "#F1C40F" to Color(0xFFF1C40F),
+                            "#FFFFFF" to Color.White
+                        )
+                        items(options) { (hex, colorVal) ->
+                            val isSel = selectedAccentColor.equals(hex, ignoreCase = true)
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(colorVal)
+                                    .border(
+                                        width = if (isSel) 3.dp else 1.dp,
+                                        color = if (isSel) Color.White else Color.White.copy(alpha = 0.2f),
+                                        shape = CircleShape
+                                    )
+                                    .clickable { onAccentColorChange(hex) }
+                            )
+                        }
+                    }
+                }
+
+                // App Backdrop Color
+                Column {
+                    Text(
+                        text = "App Canvas Preview Backdrop",
+                        color = Color.White,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        val options = listOf(
+                            "#0F172A" to Color(0xFF0F172A),
+                            "#050515" to Color(0xFF050515),
+                            "#1A1126" to Color(0xFF1A1126),
+                            "#0F2027" to Color(0xFF0F2027),
+                            "#1F1C2C" to Color(0xFF1F1C2C)
+                        )
+                        items(options) { (hex, colorVal) ->
+                            val isSel = selectedBgColor.equals(hex, ignoreCase = true)
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(colorVal)
+                                    .border(
+                                        width = if (isSel) 3.dp else 1.dp,
+                                        color = if (isSel) Color.White else Color.White.copy(alpha = 0.2f),
+                                        shape = CircleShape
+                                    )
+                                    .clickable { onBgColorChange(hex) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         // Layout Properties
         item {
             Text(
@@ -756,11 +1070,11 @@ fun DesignerTab(
                                 id = customRandomName,
                                 displayName = "My Glass Design",
                                 isDark = activeTheme.isDark,
-                                backgroundColor = "#0F172A",
-                                glassColor = "#FFFFFF",
-                                keyColor = "#FFFFFF",
-                                textColor = "#000000",
-                                accentColor = "#00BCD4",
+                                backgroundColor = selectedBgColor,
+                                glassColor = selectedGlassColor,
+                                keyColor = selectedGlassColor,
+                                textColor = if (selectedGlassColor.equals("#FFFFFF", ignoreCase = true)) "#1E293B" else "#FFFFFF",
+                                accentColor = selectedAccentColor,
                                 glassOpacity = glassOpacity,
                                 blurIntensity = blurIntensity,
                                 reflectionIntensity = reflectionIntensity,

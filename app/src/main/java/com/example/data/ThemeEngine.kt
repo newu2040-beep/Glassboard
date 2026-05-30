@@ -318,4 +318,11 @@ object ThemeEngine {
         }
         return getTheme(id)
     }
+
+    fun colorToHexStr(color: Color): String {
+        val r = (color.red * 255).toInt().coerceIn(0, 255)
+        val g = (color.green * 255).toInt().coerceIn(0, 255)
+        val b = (color.blue * 255).toInt().coerceIn(0, 255)
+        return String.format("#%02X%02X%02X", r, g, b)
+    }
 }

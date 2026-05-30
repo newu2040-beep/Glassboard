@@ -327,7 +327,10 @@ fun KeyboardView(
                             textColor = theme.textColor,
                             accentColor = theme.accentColor,
                             keyColor = theme.keyColor,
-                            onEmojiSelected = { triggerHeuristics(it) }
+                            onEmojiSelected = { triggerHeuristics(it) },
+                            onSwitchToAlphabet = { mode = KeyboardMode.ALPHABET },
+                            onBackspace = onBackspace,
+                            onSwitchKeyboard = onSwitchKeyboard
                         )
                     }
                     KeyboardMode.NUMERIC -> {

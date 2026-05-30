@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,7 +40,10 @@ object EmojiData {
                 "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚",
                 "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🥸",
                 "🤩", "🥳", "😏", "😒", "😞", "😔", "😟", "😕", "🙁", "☹️",
-                "😣", "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠", "😡"
+                "😣", "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠", "😡",
+                "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰", "😥", "😓",
+                "🤖", "👽", "👾", "💩", "🤡", "👹", "👺", "👻", "💀", "☠️",
+                "🤫", "🤭", "🤔", "😬", "🤥", "🫥", "🫠", "🫣", "🫡", "🥱"
             )
         ),
         EmojiCategory(
@@ -49,17 +53,20 @@ object EmojiData {
                 "👋", "🤚", "🖐️", "✋", "🖖", "👌", "🤌", "🤏", "✌️", "🤞",
                 "🤟", "🤘", "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👍",
                 "👎", "✊", "👊", "🤛", "🤜", "👏", "🙌", "👐", "🤲", "🤝",
-                "🙏", "✍️", "💅", "🤳", "💪", "🦾", "💪", "👂", "🦻", "👃"
+                "🙏", "✍️", "💅", "🤳", "💪", "🦾", "👂", "🦻", "👃", "🧠",
+                "🫀", "🫁", "🦷", "👁️", "👀", "🗣️", "👤", "👥", "🫂"
             )
         ),
         EmojiCategory(
             name = "Animals",
             icon = "🐶",
             list = listOf(
-                "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐻‍❄️", "🐨",
-                "🐯", "🦁", "🐮", "🐷", "🐽", "🐸", "🐵", "🙊", "🙉", "🙊",
-                "🐒", "🐔", "🐧", "🐦", "🐤", "🐣", "🐥", "🦆", "🦅", "🦉",
-                "🦇", "🐺", "🐗", "🐴", "🦄", "🐝", "🪱", "🐛", "🦋", "🐌"
+                "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯",
+                "🦁", "🐮", "🐷", "🐽", "🐸", "🐵", "🙊", "🙉", "🙈", "🐒",
+                "🐔", "🐧", "🐦", "🐤", "🐣", "🐥", "🦆", "🦅", "🦉", "🦇",
+                "🐺", "🐗", "🐴", "🦄", "🐝", "🪱", "🐛", "🦋", "🐌", "🐞",
+                "🐜", "🦟", "🕷️", "🕸️", "Scorpion", "🐢", "🐍", "🦎", "🐙", "🦑",
+                "🦞", "🦀", "🐡", "🐠", "🐟", "🐬", "🐳", "🐋", "🦈", "🐊"
             )
         ),
         EmojiCategory(
@@ -67,9 +74,11 @@ object EmojiData {
             icon = "🍎",
             list = listOf(
                 "🍏", "🍎", "🍐", "🍊", "🍋", "🍌", "🍉", "🍇", "🍓", "🫐",
-                " melon", "🍒", "🍑", "🥭", "🍍", "🥥", "🥝", "🍅", "🍆", "🥑",
-                "🥦", "🥬", "🥒", "🌶️", "🫑", "🌽", "🥕", "🫒", "🧄", "🧅",
-                "🍄", "🥜", "🌰", "🍞", "🥐", "🥖", "🫓", "🥨", "🥯", "🥞"
+                "🍒", "🍑", "🥭", "🍍", "🥥", "🥝", "🍅", "🍆", "🥑", "🥦",
+                "🥬", "🥒", "🌶️", "🫑", "🌽", "🥕", "🫒", "🧄", "🧅", "🍄",
+                "🥜", "🌰", "🍞", "🥐", "🥖", "🫓", "🥨", "🥯", "🥞", " waffle",
+                "🧀", "🍖", "🥩", "🍔", "🍟", "🍕", "🌭", "🥪", "🌮", "🌯",
+                "🥚", "🍳", "🥘", "🍲", "🥣", "🥗", "🍿", "バター", "🧂", "🥫"
             )
         ),
         EmojiCategory(
@@ -120,7 +129,10 @@ fun EmojiKeyboard(
     textColor: Color,
     accentColor: Color,
     keyColor: Color,
-    onEmojiSelected: (String) -> Unit
+    onEmojiSelected: (String) -> Unit,
+    onSwitchToAlphabet: () -> Unit,
+    onBackspace: () -> Unit,
+    onSwitchKeyboard: (() -> Unit)? = null
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategoryIndex by remember { mutableStateOf(0) }
@@ -154,7 +166,6 @@ fun EmojiKeyboard(
             emptyList()
         } else {
             allEmojis.filter { emoji ->
-                // Basic matching for previewing lists
                 emoji.contains(searchQuery) || searchQuery.length <= 1
             }
         }
@@ -163,7 +174,7 @@ fun EmojiKeyboard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(260.dp)
+            .height(270.dp)
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -182,8 +193,8 @@ fun EmojiKeyboard(
                 modifier = Modifier
                     .weight(0.6f)
                     .height(44.dp),
-                placeholder = { Text("Search Emojis...", fontSize = 12.sp, color = textColor.copy(alpha = 0.5f)) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = textColor, modifier = Modifier.size(16.dp)) },
+                placeholder = { Text("Search Emojis...", fontSize = 11.sp, color = textColor.copy(alpha = 0.5f)) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = textColor, modifier = Modifier.size(14.dp)) },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { searchQuery = "" }) {
@@ -191,7 +202,7 @@ fun EmojiKeyboard(
                         }
                     }
                 },
-                textStyle = LocalTextStyle.current.copy(fontSize = 12.sp, color = textColor),
+                textStyle = LocalTextStyle.current.copy(fontSize = 11.sp, color = textColor),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = accentColor,
                     unfocusedBorderColor = textColor.copy(alpha = 0.2f),
@@ -225,7 +236,7 @@ fun EmojiKeyboard(
                     ) {
                         Text(
                             text = displayEmoji,
-                            fontSize = 14.sp
+                            fontSize = 13.sp
                         )
                     }
                 }
@@ -253,7 +264,7 @@ fun EmojiKeyboard(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                Text("🕒", fontSize = 14.sp)
+                Text("🕒", fontSize = 13.sp)
             }
 
             EmojiData.categories.forEachIndexed { idx, cat ->
@@ -271,7 +282,7 @@ fun EmojiKeyboard(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(cat.icon, fontSize = 14.sp)
+                    Text(cat.icon, fontSize = 13.sp)
                 }
             }
         }
@@ -297,20 +308,20 @@ fun EmojiKeyboard(
                 Text(
                     "No emojis match '$searchQuery'",
                     color = textColor.copy(alpha = 0.6f),
-                    fontSize = 13.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
         } else {
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 40.dp),
+                columns = GridCells.Adaptive(minSize = 36.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
                     .padding(horizontal = 8.dp),
-                contentPadding = PaddingValues(bottom = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+                contentPadding = PaddingValues(bottom = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 items(activeList) { baseEmoji ->
                     // Skin tone modification logic
@@ -339,10 +350,93 @@ fun EmojiKeyboard(
                     ) {
                         Text(
                             text = modifiedEmoji,
-                            fontSize = 24.sp,
+                            fontSize = 22.sp,
                             textAlign = TextAlign.Center
                         )
                     }
+                }
+            }
+        }
+
+        // Bottom Accessory Row (Essential for easy text typing and quick toggle back to alphabets!)
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 6.dp, vertical = 2.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            // ABC Switch
+            Box(
+                modifier = Modifier
+                    .weight(1.5f)
+                    .height(38.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(keyColor.copy(alpha = 0.65f))
+                    .clickable { onSwitchToAlphabet() },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "ABC",
+                    color = textColor,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            // Space
+            Box(
+                modifier = Modifier
+                    .weight(3.5f)
+                    .height(38.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(keyColor.copy(alpha = 0.45f))
+                    .clickable { onEmojiSelected(" ") },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Space",
+                    color = textColor.copy(alpha = 0.8f),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            // Delete key
+            Box(
+                modifier = Modifier
+                    .weight(1.5f)
+                    .height(38.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(keyColor.copy(alpha = 0.65f))
+                    .clickable { onBackspace() },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "⌫",
+                    color = textColor,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            // Globe IME input switcher key (only if onSwitchKeyboard is set)
+            if (onSwitchKeyboard != null) {
+                Box(
+                    modifier = Modifier
+                        .weight(1.0f)
+                        .height(38.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(keyColor.copy(alpha = 0.65f))
+                        .clickable { onSwitchKeyboard() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Language,
+                        contentDescription = "Switch Keyboard",
+                        tint = textColor,
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
         }
@@ -358,7 +452,6 @@ fun reactiveListUpdateCounter(list: List<Any>): Int {
 }
 
 fun isSkinToneSupported(emoji: String): Boolean {
-    // Basic skin tone compatibility list
     val list = listOf("👋", "🤚", "🖐️", "✋", "🖖", "👌", "🤌", "🤏", "✌️", "🤞", "🤟", "🤘", "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👍", "👎", "✊", "👊", "🤛", "🤜", "👏", "🙌", "👐", "🤲", "🤝", "🙏", "✍️", "💅", "🤳", "💪")
     return list.contains(emoji) || emoji.any { it.isLetter() || it.code in 0x1F440..0x1F490 }
 }
